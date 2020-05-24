@@ -71,7 +71,7 @@ func (j *Jekyll) Build(inputDir string, outputDir string) []*exec.Cmd {
 		return nil
 	}
 
-	cmd := exec.Command("bundle", "exec", "jekyll", "build", "-d", outputDir)
+	cmd := exec.Command("bundle", "exec", "jekyll", "build", "-V", "-d", outputDir)
 	cmd.Dir = inputDir
 
 	return append(rv, cmd)
