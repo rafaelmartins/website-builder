@@ -1,14 +1,16 @@
 package jekyll
 
 import (
-	"io/ioutil"
+	"bufio"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
-type Jekyll struct{}
+type Jekyll struct {
+	bundlerVersion string
+}
 
 func (j *Jekyll) GetName() string {
 	return "Jekyll"
@@ -19,25 +21,58 @@ func (j *Jekyll) Detect(inputDir string) bool {
 		return false
 	}
 
-	// we need Gemfile.lock for bundle deployment mode
-	if content, err := ioutil.ReadFile(filepath.Join(inputDir, "Gemfile.lock")); err == nil {
-		if strings.Contains(string(content), "jekyll") || strings.Contains(string(content), "github-pages") {
-			return true
+	f, err := os.Open(filepath.Join(inputDir, "Gemfile.lock"))
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	found := false
+	next := false
+	j.bundlerVersion = ""
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if next { // this is bundler version
+			j.bundlerVersion = strings.TrimSpace(scanner.Text())
+			next = false
+			continue
 		}
+
+		if t := scanner.Text(); strings.Contains(t, "jekyll") || strings.Contains(t, "github-pages") {
+			found = true
+		}
+
+		if strings.TrimSpace(scanner.Text()) == "BUNDLED WITH" {
+			next = true
+		}
+
 	}
 
-	return false
+	return j.bundlerVersion != "" && found
 }
 
 func (j *Jekyll) Build(inputDir string, outputDir string) []*exec.Cmd {
-	cmd1 := exec.Command("bundle", "config", "set", "deployment", "true")
-	cmd1.Dir = inputDir
+	rv := []*exec.Cmd{}
 
-	cmd2 := exec.Command("bundle", "install")
-	cmd2.Dir = inputDir
+	if strings.HasPrefix(j.bundlerVersion, "1.") {
+		cmd := exec.Command("bundle", "install", "--deployment")
+		cmd.Dir = inputDir
+		rv = append(rv, cmd)
+	} else if strings.HasPrefix(j.bundlerVersion, "2.") {
+		cmd := exec.Command("bundle", "config", "set", "--local", "deployment", "true")
+		cmd.Dir = inputDir
+		rv = append(rv, cmd)
 
-	cmd3 := exec.Command("bundle", "exec", "jekyll", "build", "-d", outputDir)
-	cmd3.Dir = inputDir
+		cmd = exec.Command("bundle", "install")
+		cmd.Dir = inputDir
+		rv = append(rv, cmd)
+	} else {
+		return nil
+	}
 
-	return []*exec.Cmd{cmd1, cmd2, cmd3}
+	cmd := exec.Command("bundle", "exec", "jekyll", "build", "-d", outputDir)
+	cmd.Dir = inputDir
+
+	return append(rv, cmd)
 }
