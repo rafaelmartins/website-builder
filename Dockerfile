@@ -46,12 +46,12 @@ RUN set -x \
         rubygems \
         gcc \
         g++ \
-    && rm -rf /var/lib/apt/lists/* \
     && gem install bundler -v "~>1.0" \
     && gem install bundler \
     && rm -rf \
         /root/.gem \
-        /var/cache/apt
+        /var/cache/apt \
+        /var/lib/apt/lists/*
 
 COPY --from=golang_builder /code/website-builder /usr/local/bin/website-builder
 COPY --from=c_builder /code/blogc /usr/local/bin/blogc
