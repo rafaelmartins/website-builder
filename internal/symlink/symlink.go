@@ -29,6 +29,9 @@ func Update(symlink string, target string) error {
 	relTarget, err := filepath.Rel(filepath.Dir(absSymlink), absTarget)
 
 	log.Printf("====> creating symlink: %s -> %s", absSymlink, relTarget)
+	if err := os.MkdirAll(filepath.Dir(absSymlink), 0777); err != nil {
+		return err
+	}
 	if err := os.Symlink(relTarget, absSymlink); err != nil {
 		return err
 	}
