@@ -34,17 +34,22 @@ func main() {
 
 	log.Println("builder:", builder.GetName())
 
-	cmd := builder.Build(inputDir, outputDir)
-	if cmd == nil {
-		log.Fatalln("error: command not found")
+	cmds := builder.Build(inputDir, outputDir)
+	if cmds == nil {
+		log.Fatalln("error: no commands to run")
 	}
-
-	status, err := exec.Run(cmd)
-	if err != nil {
-		if status == 0 {
-			log.Fatalln("error:", err)
+	for _, cmd := range cmds {
+		if cmd == nil {
+			continue
 		}
-		os.Exit(status)
+
+		status, err := exec.Run(cmd)
+		if err != nil {
+			if status == 0 {
+				log.Fatalln("error:", err)
+			}
+			os.Exit(status)
+		}
 	}
 
 	if len(os.Args) == 4 {

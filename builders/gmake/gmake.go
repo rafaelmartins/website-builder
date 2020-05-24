@@ -42,10 +42,10 @@ func (gm *GMake) Detect(inputDir string) bool {
 	return exec.Command(bin, "--dry-run", "--directory", inputDir, "website-builder").Run() == nil
 }
 
-func (gm *GMake) Build(inputDir string, outputDir string) *exec.Cmd {
+func (gm *GMake) Build(inputDir string, outputDir string) []*exec.Cmd {
 	cmd := exec.Command(gm.getBinary(), "--directory", inputDir, "website-builder")
 	cmd.Env = []string{
 		"OUTPUT_DIR=" + outputDir,
 	}
-	return cmd
+	return []*exec.Cmd{cmd}
 }

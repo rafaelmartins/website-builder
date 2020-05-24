@@ -19,11 +19,11 @@ func (bm *BlogcMake) Detect(inputDir string) bool {
 	return err == nil
 }
 
-func (bm *BlogcMake) Build(inputDir string, outputDir string) *exec.Cmd {
+func (bm *BlogcMake) Build(inputDir string, outputDir string) []*exec.Cmd {
 	cmd := exec.Command("blogc-make", "all")
 	cmd.Dir = inputDir
 	cmd.Env = []string{
 		"OUTPUT_DIR=" + outputDir,
 	}
-	return cmd
+	return []*exec.Cmd{cmd}
 }
