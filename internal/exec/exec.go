@@ -30,10 +30,10 @@ func Run(cmd *exec.Cmd) (int, error) {
 	}
 
 	// run command
-	log.Printf("====> command: %q", cmd.Args)
+	log.Printf("command: %q", cmd.Args)
 	err := cmd.Run()
 	if err == nil {
-		log.Printf("====> success")
+		log.Printf("success")
 		return 0, nil
 	}
 
@@ -41,11 +41,11 @@ func Run(cmd *exec.Cmd) (int, error) {
 	if msg, ok := err.(*exec.ExitError); ok {
 		if ws, ok := msg.Sys().(syscall.WaitStatus); ok {
 			status := ws.ExitStatus()
-			log.Printf("====> failure: %d", status)
+			log.Printf("failure: %d", status)
 			return status, err
 		}
 	}
 
-	log.Printf("====> failure")
+	log.Printf("failure")
 	return 0, err
 }

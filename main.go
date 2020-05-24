@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	log.SetPrefix("")
+	log.SetPrefix("====> ")
 	log.SetFlags(0)
 
 	if l := len(os.Args); l < 3 || l > 4 {
