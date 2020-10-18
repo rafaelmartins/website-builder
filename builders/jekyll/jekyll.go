@@ -9,6 +9,7 @@ import (
 )
 
 type Jekyll struct {
+	bin            string
 	bundlerVersion string
 }
 
@@ -16,7 +17,23 @@ func (j *Jekyll) GetName() string {
 	return "Jekyll"
 }
 
+func (j *Jekyll) Available() bool {
+	if j.bin != "" {
+		return true
+	}
+	if b, err := exec.LookPath("bundle"); err != nil {
+		return false
+	} else {
+		j.bin = b
+		return true
+	}
+}
+
 func (j *Jekyll) Detect(inputDir string) bool {
+	if !j.Available() {
+		return false
+	}
+
 	if _, err := os.Stat(filepath.Join(inputDir, "_config.yml")); err != nil {
 		return false
 	}
@@ -53,25 +70,29 @@ func (j *Jekyll) Detect(inputDir string) bool {
 }
 
 func (j *Jekyll) Build(inputDir string, outputDir string) []*exec.Cmd {
+	if !j.Available() {
+		return nil
+	}
+
 	rv := []*exec.Cmd{}
 
 	if strings.HasPrefix(j.bundlerVersion, "1.") {
-		cmd := exec.Command("bundle", "install", "--deployment")
+		cmd := exec.Command(j.bin, "install", "--deployment")
 		cmd.Dir = inputDir
 		rv = append(rv, cmd)
 	} else if strings.HasPrefix(j.bundlerVersion, "2.") {
-		cmd := exec.Command("bundle", "config", "set", "--local", "deployment", "true")
+		cmd := exec.Command(j.bin, "config", "set", "--local", "deployment", "true")
 		cmd.Dir = inputDir
 		rv = append(rv, cmd)
 
-		cmd = exec.Command("bundle", "install")
+		cmd = exec.Command(j.bin, "install")
 		cmd.Dir = inputDir
 		rv = append(rv, cmd)
 	} else {
 		return nil
 	}
 
-	cmd := exec.Command("bundle", "exec", "jekyll", "build", "-V", "-d", outputDir)
+	cmd := exec.Command(j.bin, "exec", "jekyll", "build", "-V", "-d", outputDir)
 	cmd.Dir = inputDir
 
 	return append(rv, cmd)

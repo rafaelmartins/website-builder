@@ -27,12 +27,17 @@ func main() {
 		log.Fatalln("error:", err)
 	}
 
-	builder, err := builders.Detect(inputDir)
+	availableBuilders, err := builders.Available()
 	if err != nil {
 		log.Fatalln("error:", err)
 	}
+	log.Printf("available builders: %s", availableBuilders)
 
-	log.Println("builder:", builder.GetName())
+	builder, err := availableBuilders.Detect(inputDir)
+	if err != nil {
+		log.Fatalln("error:", err)
+	}
+	log.Println("detected builder:", builder.GetName())
 
 	cmds := builder.Build(inputDir, outputDir)
 	if cmds == nil {
