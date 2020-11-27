@@ -5,9 +5,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/rafaelmartins/website-builder/builders/blogc_make"
-	"github.com/rafaelmartins/website-builder/builders/gmake"
-	"github.com/rafaelmartins/website-builder/builders/jekyll"
+	"github.com/rafaelmartins/website-builder/internal/builders/blogc_make"
+	"github.com/rafaelmartins/website-builder/internal/builders/gmake"
+	"github.com/rafaelmartins/website-builder/internal/builders/jekyll"
 )
 
 type Builder interface {

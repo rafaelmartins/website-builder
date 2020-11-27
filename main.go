@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/rafaelmartins/website-builder/builders"
+	"github.com/rafaelmartins/website-builder/internal/builders"
 	"github.com/rafaelmartins/website-builder/internal/exec"
 	"github.com/rafaelmartins/website-builder/internal/symlink"
 )
